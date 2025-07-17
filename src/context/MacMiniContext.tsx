@@ -37,7 +37,7 @@ interface MacMiniProviderProps {
 
 const checkWebSocketConnection = (ip: string): Promise<WebSocket | null> => {
   return new Promise((resolve) => {
-    const ws = new WebSocket(`ws://${ip}:6363`);
+    const ws = new WebSocket(`ws://${ip}`);
     const timeout = setTimeout(() => {
       ws.close();
       resolve(null);
