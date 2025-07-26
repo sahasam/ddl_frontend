@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Plus, 
   Trash2, 
@@ -201,7 +202,7 @@ export function FloatingPanel({ containerRef }: FloatingPanelProps) {
         break;
         
       case 'disconnect':
-        // For disconnect, only cell_id is needed, port might be optional
+        // For disconnect, port might be optional but can be specified
         params = {};
         break;
     }
@@ -370,16 +371,19 @@ export function FloatingPanel({ containerRef }: FloatingPanelProps) {
                 <div>
                   <label className="text-xs text-gray-600">Cell ID</label>
                   {availableCells.length > 0 ? (
-                    <select
+                    <Select
                       value={faultForm.cellId}
-                      onChange={(e) => setFaultForm({...faultForm, cellId: e.target.value})}
-                      className="w-full text-xs border rounded px-2 py-1"
+                      onValueChange={(value) => setFaultForm({...faultForm, cellId: value})}
                     >
-                      <option value="">Select Cell</option>
-                      {availableCells.map(cell => (
-                        <option key={cell} value={cell}>{cell}</option>
-                      ))}
-                    </select>
+                      <SelectTrigger className="w-full text-xs">
+                        <SelectValue placeholder="Select Cell" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableCells.map(cell => (
+                          <SelectItem key={cell} value={cell}>{cell}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   ) : (
                     <Input
                       placeholder="Cell ID"
@@ -396,7 +400,6 @@ export function FloatingPanel({ containerRef }: FloatingPanelProps) {
                     value={faultForm.portName}
                     onChange={(e) => setFaultForm({...faultForm, portName: e.target.value})}
                     className="text-xs"
-                    disabled={faultForm.faultType === 'disconnect'}
                   />
                 </div>
               </div>
@@ -472,10 +475,10 @@ export function FloatingPanel({ containerRef }: FloatingPanelProps) {
               )}
 
               {faultForm.faultType === 'disconnect' && (
-                <div className="bg-red-50 p-2 rounded text-xs">
+                <div className="bg-red-50 border border-red-200 p-2 rounded text-xs">
                   <div className="text-red-700 font-medium">Disconnect Fault</div>
                   <div className="text-red-600">
-                    This will disconnect the entire cell. Port name is not required.
+                    This will disconnect the specified port or entire cell.
                   </div>
                 </div>
               )}
