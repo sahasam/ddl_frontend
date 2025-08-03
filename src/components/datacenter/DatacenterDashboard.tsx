@@ -1,17 +1,20 @@
 import React, { useRef, useState } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Server, Activity, CheckCircle, AlertTriangle, Network, Upload } from 'lucide-react';
+import { Server, Activity, CheckCircle, AlertTriangle, Network, Upload, MessageSquare, Zap } from 'lucide-react';
 import { useDatacenterContext } from '@/context/DatacenterContext';
 import { FloatingPanel } from './FloatingPanel';
 import { CellStatus } from './CellStatus';
 import { DAGVisualization } from './DAGVisualization';
 import { TopologyUpload } from './TopologyUpload';
+import { MessagingTab } from './MessagingTab';
+import { FSPTab } from './FSPTab';
 
 export function DatacenterDashboard() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { cells, isConnected, lastUpdate } = useDatacenterContext();
-  const [activeTab, setActiveTab] = useState<'cells' | 'dag' | 'upload'>('cells');
+  // Update the activeTab type to include 'fsp'
+  const [activeTab, setActiveTab] = useState<'cells' | 'dag' | 'upload' | 'messaging' | 'fsp'>('cells');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
@@ -49,7 +52,7 @@ export function DatacenterDashboard() {
         </div>
       </header>
 
-      {/* Tab Navigation */}
+      {/* Tab Navigation - Updated to include FSP tab */}
       <div className="mb-6">
         <div className="flex space-x-2">
           <Button
@@ -67,6 +70,22 @@ export function DatacenterDashboard() {
           >
             <Network className="w-4 h-4" />
             Topology
+          </Button>
+          <Button
+            variant={activeTab === 'fsp' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('fsp')}
+            className="flex items-center gap-2"
+          >
+            <Zap className="w-4 h-4" />
+            Firing Squad
+          </Button>
+          <Button
+            variant={activeTab === 'messaging' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('messaging')}
+            className="flex items-center gap-2"
+          >
+            <MessageSquare className="w-4 h-4" />
+            Messaging
           </Button>
           <Button
             variant={activeTab === 'upload' ? 'default' : 'outline'}
@@ -115,6 +134,16 @@ export function DatacenterDashboard() {
 
           {activeTab === 'dag' && (
             <DAGVisualization />
+          )}
+
+          {/* Add the FSP tab */}
+          {activeTab === 'fsp' && (
+            <FSPTab />
+          )}
+
+          {/* Messaging tab */}
+          {activeTab === 'messaging' && (
+            <MessagingTab />
           )}
 
           {activeTab === 'upload' && (

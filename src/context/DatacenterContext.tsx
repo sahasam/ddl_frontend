@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { DatacenterWebSocket } from '@/services/DatacenterWebSocket';
 import { Cell, DatacenterState, WebSocketMessage } from '@/types/datacenter';
 
@@ -12,6 +12,10 @@ export function DatacenterProvider({ children }: { children: ReactNode }) {
   const [links, setLinks] = useState<any[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [fspStatus, setFspStatus] = useState<Record<string, any>>({});
+  
+  // Track pending requests to match responses
+  const pendingRequests = useRef<Map<string, any>>(new Map());
 
   useEffect(() => {
     datacenterWS.connect()
@@ -61,6 +65,78 @@ export function DatacenterProvider({ children }: { children: ReactNode }) {
         });
         return newCells;
       });
+    }
+    
+    // Handle message responses with tracked requests
+    else if (message.command === 'get_messages' && message.result.success) {
+      const messages = message.result.messages || [];
+      
+      // Get the most recent get_messages request params
+      const pendingRequest = pendingRequests.current.get('get_messages');
+      const cellId = pendingRequest?.cell_id;
+      
+      console.log('Got messages response:', { cellId, messages, pendingRequest }); // Debug log
+      
+      if (cellId) {
+        // Dispatch custom event for messaging tab to listen to
+        window.dispatchEvent(new CustomEvent('cellMessagesUpdated', {
+          detail: { 
+            cellId: cellId, 
+            messages: messages 
+          }
+        }));
+        
+        // Clear the pending request
+        pendingRequests.current.delete('get_messages');
+      }
+    }
+    
+    else if (message.command === 'send_message') {
+      if (message.result.success) {
+        console.log('Message sent successfully:', message.result.message);
+      } else {
+        console.error('Failed to send message:', message.result.message);
+      }
+    }
+    
+    else if (message.command === 'broadcast_message') {
+      if (message.result.success) {
+        console.log('Broadcast sent successfully:', message.result.message);
+      } else {
+        console.error('Failed to broadcast message:', message.result.message);
+      }
+    }
+    
+    else if (message.command === 'clear_messages') {
+      if (message.result.success) {
+        console.log('Messages cleared successfully');
+        
+        // Get the pending request params
+        const pendingRequest = pendingRequests.current.get('clear_messages');
+        const cellId = pendingRequest?.cell_id;
+        
+        if (cellId) {
+          // Dispatch event to update UI
+          window.dispatchEvent(new CustomEvent('cellMessagesCleared', {
+            detail: { cellId: cellId }
+          }));
+          
+          // Clear the pending request
+          pendingRequests.current.delete('clear_messages');
+        }
+      }
+    }
+    
+    else if (message.command === 'all_fsp_status' && message.result.success) {
+      setFspStatus(message.result.data || {});
+    }
+    
+    else if (message.command === 'manual_fsp') {
+      if (message.result.success) {
+        console.log('Manual FSP triggered successfully');
+      } else {
+        console.error('Failed to trigger manual FSP:', message.result.message);
+      }
     }
   };
 
@@ -113,6 +189,55 @@ export function DatacenterProvider({ children }: { children: ReactNode }) {
     datacenterWS.sendCommand('get_metrics', { cell_id: cellId });
   };
 
+  const bindCell = (cellId: string, portname: string, addr: string) => {
+    datacenterWS.sendCommand('bind', { cell_id: cellId, port_name: portname, addr: addr});
+  }
+
+  const unbindCell = (cellId: string, portname: string) => {
+    datacenterWS.sendCommand('unbind', {cell_id: cellId, port_name: portname})
+  }
+
+  const sendMessage = (fromCellId: string, toCellId: string, message: any) => {
+    datacenterWS.sendCommand('send_message', {
+      from_cell: fromCellId,
+      to_cell: toCellId,
+      message: message
+    });
+  }
+
+  const getMessages = (cellId: string, fromCell: string | null = null) => {
+    const params = { cell_id: cellId, from_cell: fromCell };
+    
+    // Store the request params so we can match it with the response
+    pendingRequests.current.set('get_messages', params);
+    
+    datacenterWS.sendCommand('get_messages', params);
+  }
+  
+  const broadcastMessage = (cellId: string, message: any) => {
+    datacenterWS.sendCommand('broadcast_message', {
+      cell_id: cellId,
+      message: message
+    });
+  }
+
+  const clearMessage = (cellId: string) => {
+    const params = { cell_id: cellId };
+    
+    // Store the request params so we can match it with the response
+    pendingRequests.current.set('clear_messages', params);
+    
+    datacenterWS.sendCommand('clear_messages', params);
+  }
+
+  const manualFsp = (general: boolean) => {
+    datacenterWS.sendCommand('manual_fsp', { general });
+  };
+
+  const getAllFspStatus = () => {
+    datacenterWS.sendCommand('all_fsp_status');
+  };
+
   const teardown = () => {
     datacenterWS.sendCommand('teardown');
     setCells({});
@@ -145,6 +270,7 @@ export function DatacenterProvider({ children }: { children: ReactNode }) {
     links,
     isConnected,
     lastUpdate,
+    fspStatus,
     addCell,
     removeCell,
     createLink,
@@ -154,6 +280,14 @@ export function DatacenterProvider({ children }: { children: ReactNode }) {
     injectFault,
     clearFault,
     sendCommand,
+    unbindCell,
+    bindCell,
+    sendMessage,
+    getMessages,
+    broadcastMessage,
+    clearMessage,
+    manualFsp,
+    getAllFspStatus
   };
 
   return (

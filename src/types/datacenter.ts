@@ -27,8 +27,17 @@ export interface Cell {
     getMetrics: (cellId: string) => void;
     teardown: () => void;
     injectFault: (cellId: string, portName: string, faultType: string, params?: any) => void;
+    unbindCell: (cellId: string, portname: string) => void;
+    bindCell: (cellId: string, portname: string, addr: string) => void;
+    getMessages: (cellId: string, fromCell: string | null) => void;
+    sendMessage: (fromCellId: string, toCellId: string, message: any) => void;
+    broadcastMessage: (cellId: string, message: any) => void;
+    clearMessage: (cellId: string) => void;
     clearFault: (cellId: string, portName: string) => void;
     sendCommand: (command: string, params?: any) => void;
+    fspStatus: Record<string, any>;
+    manualFsp: (general: string) => void;
+    getAllFspStatus: () => void;
   }
   
   export interface WebSocketMessage {

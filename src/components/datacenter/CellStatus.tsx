@@ -756,6 +756,15 @@ export function CellStatus({ cellId, cell }: CellStatusProps) {
             <div className="space-y-2">
               <div className="bg-gray-50 p-2 rounded text-xs max-h-64 overflow-y-auto">
                 <div className="font-medium mb-2 text-gray-700">Raw Metrics Data</div>
+                      <button
+                  onClick={() =>
+                    navigator.clipboard.writeText(JSON.stringify(cell.metrics, null, 2))
+                  }
+                  className="text-gray-500 hover:text-gray-700 text-xs underline"
+                >
+                  Copy
+                </button>
+
                 {cell.metrics ? (
                   <div className="font-mono text-xs">
                     <pre className="whitespace-pre-wrap break-words text-gray-800">

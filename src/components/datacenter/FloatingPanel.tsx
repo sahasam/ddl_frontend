@@ -50,7 +50,9 @@ export function FloatingPanel({ containerRef }: FloatingPanelProps) {
     teardown, 
     injectFault,
     clearFault,
-    cells 
+    cells,
+    bindCell,
+    unbindCell
   } = useDatacenterContext();
 
   const [cellId, setCellId] = useState('');
@@ -73,6 +75,37 @@ export function FloatingPanel({ containerRef }: FloatingPanelProps) {
     dropRate: '50',
     delayTime: '100'
   });
+  const [bindForm, setBindForm] = useState({
+    cellId: '',
+    portName: '',
+    address: ''
+  });
+  
+  {/* Add these handler functions with the other handlers */}
+  const handleBind = () => {
+    const { cellId, portName, address } = bindForm;
+    if (cellId && portName && address) {
+      bindCell(cellId, portName, address);
+      setBindForm({
+        cellId: '',
+        portName: '',
+        address: ''
+      });
+    }
+  };
+  
+  const handleUnbind = () => {
+    const { cellId, portName } = bindForm;
+    if (cellId && portName) {
+      unbindCell(cellId, portName);
+      setBindForm({
+        cellId: '',
+        portName: '',
+        address: ''
+      });
+    }
+  };
+  
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!panelRef.current || !containerRef.current) return;
@@ -361,6 +394,75 @@ export function FloatingPanel({ containerRef }: FloatingPanelProps) {
               </Button>
             </div>
           </div>
+          <div className="space-y-2">
+          <h3 className="text-sm font-semibold">Port Binding</h3>
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-xs text-gray-600">Cell ID</label>
+                {availableCells.length > 0 ? (
+                  <select
+                    value={bindForm.cellId}
+                    onChange={(e) => setBindForm({...bindForm, cellId: e.target.value})}
+                    className="w-full text-xs border rounded px-2 py-1"
+                  >
+                    <option value="">Select Cell</option>
+                    {availableCells.map(cell => (
+                      <option key={cell} value={cell}>{cell}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <Input
+                    placeholder="Cell ID"
+                    value={bindForm.cellId}
+                    onChange={(e) => setBindForm({...bindForm, cellId: e.target.value})}
+                    className="text-xs"
+                  />
+                )}
+              </div>
+              <div>
+                <label className="text-xs text-gray-600">Port Name</label>
+                <Input
+                  placeholder="Port (e.g., p0, en0)"
+                  value={bindForm.portName}
+                  onChange={(e) => setBindForm({...bindForm, portName: e.target.value})}
+                  className="text-xs"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-xs text-gray-600">Address</label>
+              <Input
+                placeholder="IP Address (e.g., 192.168.1.10)"
+                value={bindForm.address}
+                onChange={(e) => setBindForm({...bindForm, address: e.target.value})}
+                className="text-xs"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Button 
+                onClick={handleBind}
+                variant="default" 
+                size="sm" 
+                className="text-xs"
+                disabled={!bindForm.cellId || !bindForm.portName || !bindForm.address}
+              >
+                <Wifi className="w-3 h-3 mr-1" />
+                Bind Port
+              </Button>
+              <Button 
+                onClick={handleUnbind}
+                variant="outline" 
+                size="sm" 
+                className="text-xs"
+                disabled={!bindForm.cellId || !bindForm.portName}
+              >
+                <WifiOff className="w-3 h-3 mr-1" />
+                Unbind Port
+              </Button>
+            </div>
+          </div>
+        </div>
 
           {/* Enhanced Fault Injection */}
           <div className="space-y-2">

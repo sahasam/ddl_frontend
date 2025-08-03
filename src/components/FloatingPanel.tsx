@@ -49,7 +49,10 @@ export function FloatingPanel({ containerRef }: FloatingPanelProps) {
     teardown, 
     injectFault,
     clearFault,
-    cells 
+    cells,
+    bindCell,
+    unbindCell,
+    
   } = useDatacenterContext();
 
   const [cellId, setCellId] = useState('');
@@ -72,6 +75,38 @@ export function FloatingPanel({ containerRef }: FloatingPanelProps) {
     dropRate: '50',
     delayTime: '100'
   });
+
+  const [bindForm, setBindForm] = useState({
+    cellId: '',
+    portName: '',
+    address: ''
+  });
+  
+  {/* Add these handler functions with the other handlers */}
+  const handleBind = () => {
+    const { cellId, portName, address } = bindForm;
+    if (cellId && portName && address) {
+      bindCell(cellId, portName, address);
+      setBindForm({
+        cellId: '',
+        portName: '',
+        address: ''
+      });
+    }
+  };
+  
+  const handleUnbind = () => {
+    const { cellId, portName } = bindForm;
+    if (cellId && portName) {
+      unbindCell(cellId, portName);
+      setBindForm({
+        cellId: '',
+        portName: '',
+        address: ''
+      });
+    }
+  };
+  
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!panelRef.current || !containerRef.current) return;
@@ -360,6 +395,7 @@ export function FloatingPanel({ containerRef }: FloatingPanelProps) {
               </Button>
             </div>
           </div>
+          
 
           {/* Enhanced Fault Injection */}
           <div className="space-y-2">
