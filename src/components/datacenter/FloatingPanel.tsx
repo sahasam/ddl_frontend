@@ -22,7 +22,7 @@ import { useDatacenterContext } from '@/context/DatacenterContext';
 import { LinkFormData } from '@/types/datacenter';
 
 interface FloatingPanelProps {
-  containerRef: React.RefObject<HTMLDivElement>;
+  containerRef: React.RefObject<HTMLDivElement | null>; // Allow null
 }
 
 interface FaultForm {

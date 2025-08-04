@@ -237,7 +237,7 @@ export function DatacenterProvider({ children }: { children: ReactNode }) {
     datacenterWS.sendCommand('clear_messages', params);
   }
 
-  const manualFsp = (general: boolean) => {
+  const manualFsp = (general: string) => {
     datacenterWS.sendCommand('manual_fsp', { general });
   };
 

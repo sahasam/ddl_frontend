@@ -102,7 +102,7 @@ export function DatacenterDashboard() {
         ref={containerRef}
         className="relative w-full h-[calc(100vh-12rem)] border rounded-lg bg-white shadow-sm overflow-hidden"
       >
-        <FloatingPanel containerRef={containerRef} />
+        {containerRef.current && <FloatingPanel containerRef={containerRef} />}
         
         <div className="p-6 h-full overflow-y-auto">
           {activeTab === 'cells' && (

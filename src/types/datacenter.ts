@@ -41,7 +41,7 @@ export interface Cell {
   }
   
   export interface WebSocketMessage {
-    type: 'command_response' | 'metrics_update' | 'error';
+    type: 'command_response' | 'metrics_update' | 'error' | 'fsp_status_update';
     command?: string;
     result?: any;
     data?: any;
