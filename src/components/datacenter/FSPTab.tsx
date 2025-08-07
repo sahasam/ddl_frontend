@@ -75,6 +75,11 @@ const getStateRobot = (state: string): string => {
 };
 
 const getStateAnimation = (state: string): string => {
+  // Handle null, undefined, or empty states
+  if (!state || typeof state !== 'string') {
+    return ''; // No animation for invalid states
+  }
+  
   if (state === 'T') {
     return 'animate-bounce'; // Bounce animation for firing
   } else if (state.startsWith('A')) {
