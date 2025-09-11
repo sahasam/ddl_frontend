@@ -32,9 +32,6 @@ export function DatacenterProvider({ children }: { children: ReactNode }) {
         case 'metrics_update':
           handleMetricsUpdate(message.data);
           break;
-        case 'fsp_status_update':
-          handleFspStatusUpdate(message.data);
-          break;
         case 'error':
           console.error('Server error:', message.message);
           break;
@@ -141,10 +138,6 @@ export function DatacenterProvider({ children }: { children: ReactNode }) {
         console.error('Failed to trigger manual FSP:', message.result.message);
       }
     }
-  };
-
-  const handleFspStatusUpdate = (fspData: Record<string, any>) => {
-    setFspStatus(fspData);
   };
 
   const handleMetricsUpdate = (metricsData: Record<string, any>) => {

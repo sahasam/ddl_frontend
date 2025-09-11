@@ -2,12 +2,10 @@
 "use client";
 
 import { MacMiniProvider } from "@/context/MacMiniContext";
-import DashboardContent from "@/components/DashboardContent";
+//import DashboardContent from "@/components/DashboardContent";
+import DatacenterApp from '@/components/DatacenterApp';
 
-export default function DashboardPage() {
-  return (
-    <MacMiniProvider>
-      <DashboardContent />
-    </MacMiniProvider>
-  );
+
+export default function Page() {
+  return <DatacenterApp />;
 }
